@@ -7,33 +7,74 @@ interface PageProps {
 }
 
 async function getCompany(id: string) {
-  const supabase = createServerClient()
-  const { data: company } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('id', parseInt(id))
-    .single()
-  
-  return company
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('id', Number(id))
+      .single()
+    
+    if (error) {
+      console.error('getCompany error:', error)
+      return null
+    }
+    return data
+  } catch (e) {
+    console.error('getCompany exception:', e)
+    return null
+  }
 }
 
 async function getCompanyReviews(companyId: number) {
-  const supabase = createServerClient()
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false })
-    .limit(20)
-  
-  return reviews || []
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    
+    if (error) {
+      console.error('getCompanyReviews error:', error)
+      return []
+    }
+    return data || []
+  } catch (e) {
+    console.error('getCompanyReviews exception:', e)
+    return []
+  }
 }
 
 export default async function CompanyPage({ params }: PageProps) {
   const company = await getCompany(params.id)
   
   if (!company) {
-    notFound()
+    return (
+      <div className="container">
+        <header className="header">
+          <div className="header-content">
+            <Link href="/" className="logo">
+              <div className="logo-icon">济</div>
+              <div className="logo-text">济企通</div>
+            </Link>
+            <nav className="nav">
+              <Link href="/">首页</Link>
+              <Link href="/companies">企业列表</Link>
+              <Link href="/submit">投稿</Link>
+            </nav>
+          </div>
+        </header>
+        <section className="page-header">
+          <div className="container">
+            <h1>企业未找到</h1>
+            <p>该企业可能不存在或已被删除</p>
+            <Link href="/companies" className="back-link">← 返回企业列表</Link>
+          </div>
+        </section>
+      </div>
+    )
   }
   
   const reviews = await getCompanyReviews(company.id)
@@ -57,7 +98,7 @@ export default async function CompanyPage({ params }: PageProps) {
       <section className="page-header">
         <div className="container">
           <Link href="/companies" className="back-link">← 返回企业列表</Link>
-          <h1>{company.name}</h1>
+          <h1>{company.name || '未知企业'}</h1>
           <div className="detail-meta">
             {company.location && <span className="meta-item">📍 {company.location}</span>}
             {company.industry && <span className="meta-item">💼 {company.industry}</span>}
