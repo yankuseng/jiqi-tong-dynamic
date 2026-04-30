@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase'
 
 interface PageProps {
   params: { id: string }
 }
 
 async function getCompany(id: string) {
+  const supabase = createServerClient()
   const { data: company } = await supabase
     .from('companies')
     .select('*')
@@ -17,6 +18,7 @@ async function getCompany(id: string) {
 }
 
 async function getCompanyReviews(companyId: number) {
+  const supabase = createServerClient()
   const { data: reviews } = await supabase
     .from('reviews')
     .select('*')
@@ -57,9 +59,8 @@ export default async function CompanyPage({ params }: PageProps) {
           <Link href="/companies" className="back-link">← 返回企业列表</Link>
           <h1>{company.name}</h1>
           <div className="detail-meta">
-            {company.address && <span className="meta-item">📍 {company.address}</span>}
-            {company.business && <span className="meta-item">💼 {company.business}</span>}
-            <span className="meta-item">💬 {company.posts_count}条讨论</span>
+            {company.location && <span className="meta-item">📍 {company.location}</span>}
+            {company.industry && <span className="meta-item">💼 {company.industry}</span>}
           </div>
         </div>
       </section>
@@ -68,29 +69,6 @@ export default async function CompanyPage({ params }: PageProps) {
         <div className="container">
           <div className="detail-grid">
             <div className="detail-main">
-              {company.summary && (
-                <div className="detail-card">
-                  <h3>💬 点评摘要</h3>
-                  <p className="summary-text">{company.summary}</p>
-                </div>
-              )}
-
-              {company.overtime && (
-                <div className="detail-card">
-                  <h3>⏰ 加班情况</h3>
-                  <p className="overtime-text">{company.overtime}</p>
-                </div>
-              )}
-
-              <div className="detail-card">
-                <h3>💡 求职建议</h3>
-                <ul className="advice-list">
-                  <li>{company.has_salary ? '✅ 有用户分享过薪资信息' : '❓ 暂无薪资信息，建议面试时询问'}</li>
-                  <li>{company.has_overtime ? '✅ 有用户讨论过加班情况' : '❓ 暂无加班讨论，建议多方打听'}</li>
-                  <li>🔍 建议通过多个渠道核实信息</li>
-                </ul>
-              </div>
-
               <div className="detail-card">
                 <h3>📖 最新点评</h3>
                 {reviews.length === 0 ? (
@@ -104,6 +82,12 @@ export default async function CompanyPage({ params }: PageProps) {
                         </span>
                       </div>
                       <p className="review-content">{review.content}</p>
+                      {review.overtime && (
+                        <p className="review-meta">⏰ 加班情况：{review.overtime}</p>
+                      )}
+                      {review.salary_range && (
+                        <p className="review-meta">💰 薪资情况：{review.salary_range}</p>
+                      )}
                     </div>
                   ))
                 )}
@@ -118,22 +102,18 @@ export default async function CompanyPage({ params }: PageProps) {
                     <span className="info-label">企业名称</span>
                     <span className="info-value">{company.name}</span>
                   </div>
-                  {company.address && (
+                  {company.location && (
                     <div className="info-item">
-                      <span className="info-label">地址</span>
-                      <span className="info-value">{company.address}</span>
+                      <span className="info-label">所在城市</span>
+                      <span className="info-value">{company.location}</span>
                     </div>
                   )}
-                  {company.business && (
+                  {company.industry && (
                     <div className="info-item">
-                      <span className="info-label">主营业务</span>
-                      <span className="info-value">{company.business}</span>
+                      <span className="info-label">所属行业</span>
+                      <span className="info-value">{company.industry}</span>
                     </div>
                   )}
-                  <div className="info-item">
-                    <span className="info-label">数据来源</span>
-                    <span className="info-value">{company.posts_count}条用户讨论</span>
-                  </div>
                 </div>
               </div>
 
