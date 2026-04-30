@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase'
 
 async function getCompanies(search?: string) {
+  const supabase = createServerClient()
   let query = supabase
     .from('companies')
     .select('*')
-    .order('posts_count', { ascending: false })
+    .order('热度指数', { ascending: false })
   
   if (search) {
     query = query.ilike('name', `%${search}%`)
@@ -70,16 +71,9 @@ export default async function CompaniesPage({
                 <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
                   <div className="company-header">
                     <h3 className="company-name">{company.name}</h3>
-                    <span className="company-posts">{company.posts_count}条讨论</span>
+                    <span className="company-posts">{company.industry}</span>
                   </div>
-                  {company.business && <p className="company-business">{company.business}</p>}
-                  <div className="company-tags">
-                    {company.has_overtime && <span className="tag tag-warning">有加班讨论</span>}
-                    {company.has_salary && <span className="tag tag-info">有薪资讨论</span>}
-                  </div>
-                  {company.summary && (
-                    <p className="company-summary">{company.summary.substring(0, 80)}...</p>
-                  )}
+                  {company.location && <p className="company-business">{company.location}</p>}
                 </Link>
               ))
             )}
