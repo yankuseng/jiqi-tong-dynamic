@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase'
 
 async function getCompanies() {
+  const supabase = createServerClient()
   const { data: companies } = await supabase
     .from('companies')
     .select('*')
@@ -42,7 +43,7 @@ export default async function HomePage() {
       <section className="stats-bar">
         <div className="stats-grid">
           <div className="stat-item">
-            <div className="number">{companies.length}0+</div>
+            <div className="number">{companies.length}+</div>
             <div className="label">收录企业</div>
           </div>
           <div className="stat-item">
@@ -66,9 +67,6 @@ export default async function HomePage() {
                 <span className="company-posts">{company.industry}</span>
               </div>
               {company.location && <p className="company-business">{company.location}</p>}
-              <div className="company-tags">
-                {company.行业 && <span className="tag tag-info">{company.industry}</span>}
-              </div>
             </Link>
           ))}
         </div>
