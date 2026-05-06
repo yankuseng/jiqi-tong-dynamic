@@ -6,7 +6,7 @@ async function getCompanies() {
   const { data: companies } = await supabase
     .from('companies')
     .select('*')
-    .order('热度指数', { ascending: false })
+    .order('posts_count', { ascending: false })
     .limit(20)
   
   return companies || []
@@ -64,9 +64,9 @@ export default async function HomePage() {
             <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
               <div className="company-header">
                 <h3 className="company-name">{company.name}</h3>
-                <span className="company-posts">{company.industry}</span>
+                <span className="company-posts">{company.business}</span>
               </div>
-              {company.location && <p className="company-business">{company.location}</p>}
+              {company.address && <p className="company-business">{company.address}</p>}
             </Link>
           ))}
         </div>
