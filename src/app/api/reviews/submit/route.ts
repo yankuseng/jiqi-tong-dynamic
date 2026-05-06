@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
           company_id: companyId,
           content,
           overtime: overtime || null,
-          salary_range: salary || null,
+          salary: salary || null,
         })
       
       if (insertError) {
