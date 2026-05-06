@@ -6,7 +6,7 @@ async function getCompanies(search?: string) {
   let query = supabase
     .from('companies')
     .select('*')
-    .order('热度指数', { ascending: false })
+    .order('posts_count', { ascending: false })
   
   if (search) {
     query = query.ilike('name', `%${search}%`)
@@ -71,9 +71,9 @@ export default async function CompaniesPage({
                 <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
                   <div className="company-header">
                     <h3 className="company-name">{company.name}</h3>
-                    <span className="company-posts">{company.industry}</span>
+                    <span className="company-posts">{company.business}</span>
                   </div>
-                  {company.location && <p className="company-business">{company.location}</p>}
+                  {company.address && <p className="company-business">{company.address}</p>}
                 </Link>
               ))
             )}
