@@ -177,35 +177,21 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     
     if (moderation.passed) {
-      // Low risk - auto publish
-      // First check if company exists, if not create it
-      let companyId: number
-      
+      // Company must exist in database - find it
       const { data: existingCompany } = await supabase
         .from('companies')
-        .select('id')
+        .select('id, name')
         .eq('name', company_name)
         .single()
       
-      if (existingCompany) {
-        companyId = existingCompany.id
-      } else {
-        // Create new company
-        const { data: newCompany, error: createError } = await supabase
-          .from('companies')
-          .insert({ name: company_name })
-          .select('id')
-          .single()
-        
-        if (createError || !newCompany) {
-          console.error('Failed to create company:', createError)
-          return NextResponse.json(
-            { error: '系统错误，请重试' },
-            { status: 500 }
-          )
-        }
-        companyId = newCompany.id
+      if (!existingCompany) {
+        return NextResponse.json(
+          { error: '未找到该公司，请先在企业列表中搜索确认公司存在' },
+          { status: 400 }
+        )
       }
+      
+      const companyId: number = existingCompany.id
       
       // Insert review
       const { error: insertError } = await supabase
