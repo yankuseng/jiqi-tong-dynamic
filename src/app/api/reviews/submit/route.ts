@@ -227,7 +227,8 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({
         status: 'approved',
-        message: '点评已发布'
+        message: '点评已发布',
+        company_id: companyId
       })
       
     } else {
