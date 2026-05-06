@@ -14,12 +14,17 @@ function SubmitForm() {
     content: '',
     overtime: '',
     salary: '',
+    agreed: false,
   })
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.agreed) {
+      setResult({ type: 'error', message: '请先阅读并同意《用户服务协议与社区准则》' })
+      return
+    }
     setSubmitting(true)
     setResult(null)
 
@@ -121,6 +126,19 @@ function SubmitForm() {
               placeholder="例如：12K × 13薪"
             />
             <p className="form-hint">薪资信息会帮助求职者更好地评估offer</p>
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="agree"
+              checked={formData.agreed}
+              onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
+              style={{ marginTop: 4, width: 16, height: 16, cursor: 'pointer' }}
+            />
+            <label htmlFor="agree" style={{ fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.5 }}>
+              我已阅读并同意<a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>《用户服务协议与社区准则》</a>，承诺以上内容真实有效，基于本人真实工作经历，如有虚假由本人承担法律责任。
+            </label>
           </div>
 
           <button type="submit" className="submit-btn" disabled={submitting}>
