@@ -34,7 +34,11 @@ function SubmitForm() {
 
       if (res.ok) {
         if (data.status === 'approved') {
-          setResult({ type: 'success', message: '提交成功！你的点评已直接发布。' })
+          setResult({ type: 'success', message: '提交成功！正在跳转到企业详情页...' })
+          // Redirect to company detail page after short delay
+          setTimeout(() => {
+            router.push(`/companies/${data.company_id || ''}`)
+          }, 1000)
           setFormData({ company_name: '', content: '', overtime: '', salary: '' })
         } else if (data.status === 'pending') {
           setResult({ type: 'warning', message: '提交成功！你的点评正在审核中，审核通过后会显示。' })
