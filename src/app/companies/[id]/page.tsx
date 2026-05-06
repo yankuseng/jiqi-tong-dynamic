@@ -126,8 +126,8 @@ export default async function CompanyPage({ params }: PageProps) {
                       {review.overtime && (
                         <p className="review-meta">⏰ 加班情况：{review.overtime}</p>
                       )}
-                      {review.salary_range && (
-                        <p className="review-meta">💰 薪资情况：{review.salary_range}</p>
+                      {review.salary && (
+                        <p className="review-meta">💰 薪资情况：{review.salary}</p>
                       )}
                     </div>
                   ))
