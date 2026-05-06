@@ -100,8 +100,8 @@ export default async function CompanyPage({ params }: PageProps) {
           <Link href="/companies" className="back-link">← 返回企业列表</Link>
           <h1>{company.name || '未知企业'}</h1>
           <div className="detail-meta">
-            {company.location && <span className="meta-item">📍 {company.location}</span>}
-            {company.industry && <span className="meta-item">💼 {company.industry}</span>}
+            {company.address && <span className="meta-item">📍 {company.address}</span>}
+            {company.business && <span className="meta-item">💼 {company.business}</span>}
           </div>
         </div>
       </section>
@@ -143,16 +143,16 @@ export default async function CompanyPage({ params }: PageProps) {
                     <span className="info-label">企业名称</span>
                     <span className="info-value">{company.name}</span>
                   </div>
-                  {company.location && (
+                  {company.address && (
                     <div className="info-item">
                       <span className="info-label">所在城市</span>
-                      <span className="info-value">{company.location}</span>
+                      <span className="info-value">{company.address}</span>
                     </div>
                   )}
-                  {company.industry && (
+                  {company.business && (
                     <div className="info-item">
                       <span className="info-label">所属行业</span>
-                      <span className="info-value">{company.industry}</span>
+                      <span className="info-value">{company.business}</span>
                     </div>
                   )}
                 </div>
