@@ -78,6 +78,8 @@ function SubmitForm() {
               onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
               placeholder="请输入公司全称"
               required
+              readOnly={!!preselectedCompany}
+              style={preselectedCompany ? { backgroundColor: 'var(--bg-color)', cursor: 'not-allowed' } : {}}
             />
           </div>
 
