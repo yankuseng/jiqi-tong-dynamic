@@ -33,6 +33,7 @@ async function getCompanyReviews(companyId: number) {
       .from('reviews')
       .select('*')
       .eq('company_id', companyId)
+      .neq('content', '')
       .order('created_at', { ascending: false })
       .limit(20)
     
