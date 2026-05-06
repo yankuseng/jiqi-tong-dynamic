@@ -15,7 +15,11 @@ export async function GET() {
       return NextResponse.json({
         status: 'error',
         message: error.message,
-        details: error
+        details: error,
+        env: {
+          url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          keyPrefix: process.env.NEXT_PUBLIC_SUPABASE_KEY?.slice(0, 20) + '...'
+        }
       })
     }
     
