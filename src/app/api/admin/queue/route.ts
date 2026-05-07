@@ -9,6 +9,8 @@ export async function GET() {
       .from('review_queue')
       .select('*')
       .eq('status', 'pending')
+      .not('content', 'is', null)
+      .neq('content', '')
       .order('created_at', { ascending: true })
 
     if (error) {
