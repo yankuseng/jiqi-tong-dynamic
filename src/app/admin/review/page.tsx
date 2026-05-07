@@ -63,7 +63,7 @@ function ReviewContent() {
         if (data.queue.length > 0 && !currentItem) {
           setCurrentItem(data.queue[0])
         } else if (currentItem) {
-          const stillExists = data.queue.find(item => item.id === currentItem.id)
+          const stillExists = data.queue.find((item: QueueItem) => item.id === currentItem.id)
           if (!stillExists) {
             setCurrentItem(data.queue[0] || null)
           }
