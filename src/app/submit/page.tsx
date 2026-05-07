@@ -39,12 +39,13 @@ function SubmitForm() {
 
       if (res.ok) {
         if (data.status === 'approved') {
-          setResult({ type: 'success', message: '提交成功！正在跳转到企业详情页...' })
-          // Redirect to company detail page after short delay
-          setTimeout(() => {
-            router.push(`/companies/${data.company_id || ''}`)
-          }, 1000)
+          // 如果有company_id则跳转到企业详情页，否则跳转到企业列表
+          const redirectUrl = data.company_id ? `/companies/${data.company_id}` : '/companies'
+          setResult({ type: 'success', message: '提交成功！正在跳转...' })
           setFormData({ company_name: '', content: '', overtime: '', salary: '' })
+          setTimeout(() => {
+            router.push(redirectUrl)
+          }, 1000)
         } else if (data.status === 'pending') {
           setResult({ type: 'warning', message: '提交成功！你的点评正在审核中，审核通过后会显示。' })
           setFormData({ company_name: '', content: '', overtime: '', salary: '' })
