@@ -12,8 +12,11 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // Build query with optional search
-    let query = supabase
+    // Count query
+    let countQuery = supabase.from('reviews').select('id', { count: 'exact', head: true })
+
+    // Data query with join
+    let dataQuery = supabase
       .from('reviews')
       .select(`
         id,
@@ -22,13 +25,12 @@ export async function GET(request: NextRequest) {
         salary,
         created_at,
         company:companies(id, name)
-      `, { count: 'exact' })
-      .eq('status', 'approved')
+      `)
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize - 1)
 
     if (search) {
-      // Search by company name or review content
+      // Search by company name
       const { data: matchedCompanies } = await supabase
         .from('companies')
         .select('id')
@@ -37,21 +39,29 @@ export async function GET(request: NextRequest) {
       const companyIds = matchedCompanies?.map(c => c.id) || []
 
       if (companyIds.length > 0) {
-        query = query.in('company_id', companyIds)
+        countQuery = countQuery.in('company_id', companyIds)
+        dataQuery = dataQuery.in('company_id', companyIds)
       } else {
-        // No companies matched, return empty
         return NextResponse.json({ reviews: [], total: 0, page, pageSize })
       }
     }
 
-    const { data: reviews, error, count } = await query
+    const [{ data: reviews, count }, error] = await Promise.all([
+      dataQuery,
+      countQuery
+    ])
 
     if (error) {
       console.error('Failed to fetch reviews:', error)
       return NextResponse.json({ error: '获取点评列表失败' }, { status: 500 })
     }
 
-    return NextResponse.json({ reviews: reviews || [], total: count || 0, page, pageSize })
+    return NextResponse.json({
+      reviews: reviews || [],
+      total: count || 0,
+      page,
+      pageSize
+    })
 
   } catch (error) {
     console.error('Reviews API error:', error)
@@ -64,7 +74,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const idParam = searchParams.get('id')
-    const idsParam = searchParams.get('ids') // comma-separated for batch
+    const idsParam = searchParams.get('ids')
 
     if (!idParam && !idsParam) {
       return NextResponse.json({ error: '缺少点评ID' }, { status: 400 })
@@ -83,7 +93,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '无效的ID' }, { status: 400 })
     }
 
-    // Delete reviews
     const { error: deleteError } = await supabase
       .from('reviews')
       .delete()
