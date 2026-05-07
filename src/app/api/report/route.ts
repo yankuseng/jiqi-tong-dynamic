@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
+import { notifyReport } from '@/lib/feishu'
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +45,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // 发送飞书通知
+    await notifyReport({ company_name, review_content, report_reason, contact_name, contact_phone, evidence })
 
     return NextResponse.json({
       success: true,
