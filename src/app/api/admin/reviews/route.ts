@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
-// GET: 获取已发布的点评列表
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -12,11 +11,8 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // Count query
-    let countQuery = supabase.from('reviews').select('id', { count: 'exact', head: true })
-
-    // Data query with join
-    let dataQuery = supabase
+    // Build base queries
+    let reviewsQuery = supabase
       .from('reviews')
       .select(`
         id,
@@ -25,35 +21,34 @@ export async function GET(request: NextRequest) {
         salary,
         created_at,
         company:companies(id, name)
-      `)
+      `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize - 1)
 
+    // Apply search filter if needed
     if (search) {
-      // Search by company name
       const { data: matchedCompanies } = await supabase
         .from('companies')
         .select('id')
         .ilike('name', `%${search}%`)
 
       const companyIds = matchedCompanies?.map(c => c.id) || []
-
       if (companyIds.length > 0) {
-        countQuery = countQuery.in('company_id', companyIds)
-        dataQuery = dataQuery.in('company_id', companyIds)
+        reviewsQuery = reviewsQuery.in('company_id', companyIds)
       } else {
         return NextResponse.json({ reviews: [], total: 0, page, pageSize })
       }
     }
 
-    const [{ data: reviews, count }, error] = await Promise.all([
-      dataQuery,
-      countQuery
-    ])
+    const { data: reviews, error, count } = await reviewsQuery
 
     if (error) {
-      console.error('Failed to fetch reviews:', error)
-      return NextResponse.json({ error: '获取点评列表失败' }, { status: 500 })
+      console.error('Reviews query error:', error)
+      return NextResponse.json({
+        error: '获取点评列表失败',
+        detail: error.message,
+        code: error.code
+      }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -63,13 +58,12 @@ export async function GET(request: NextRequest) {
       pageSize
     })
 
-  } catch (error) {
-    console.error('Reviews API error:', error)
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 })
+  } catch (err) {
+    console.error('Reviews API error:', err)
+    return NextResponse.json({ error: '服务器错误', detail: String(err) }, { status: 500 })
   }
 }
 
-// DELETE: 删除已发布的点评
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -100,7 +94,7 @@ export async function DELETE(request: NextRequest) {
 
     if (deleteError) {
       console.error('Failed to delete reviews:', deleteError)
-      return NextResponse.json({ error: '删除失败' }, { status: 500 })
+      return NextResponse.json({ error: '删除失败', detail: deleteError.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, deleted: ids.length })
