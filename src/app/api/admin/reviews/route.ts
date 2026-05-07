@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 3: Get company names for these reviews
-    const allCompanyIds = [...new Set((reviews || []).map((r: any) => r.company_id).filter(Boolean))]
+    const allCompanyIds = Array.from(new Set((reviews || []).map((r: any) => r.company_id).filter(Boolean)))
     let companyMap: Record<number, string> = {}
     if (allCompanyIds.length > 0) {
       const { data: companies } = await supabase
