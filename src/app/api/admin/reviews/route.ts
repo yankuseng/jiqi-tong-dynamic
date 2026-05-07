@@ -11,36 +11,28 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // Build base queries
+    // Step 1: Get reviews (simple query, no join)
     let reviewsQuery = supabase
       .from('reviews')
-      .select(`
-        id,
-        content,
-        overtime,
-        salary,
-        created_at,
-        company:companies(id, name)
-      `, { count: 'exact' })
+      .select('id, content, overtime, salary, company_id, created_at')
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize - 1)
 
-    // Apply search filter if needed
+    // Step 2: If search, find matching company IDs first
+    let companyIds: number[] | null = null
     if (search) {
-      const { data: matchedCompanies } = await supabase
+      const { data: companies } = await supabase
         .from('companies')
         .select('id')
         .ilike('name', `%${search}%`)
-
-      const companyIds = matchedCompanies?.map(c => c.id) || []
-      if (companyIds.length > 0) {
-        reviewsQuery = reviewsQuery.in('company_id', companyIds)
-      } else {
+      companyIds = companies?.map(c => c.id) || []
+      if (companyIds.length === 0) {
         return NextResponse.json({ reviews: [], total: 0, page, pageSize })
       }
+      reviewsQuery = reviewsQuery.in('company_id', companyIds)
     }
 
-    const { data: reviews, error, count } = await reviewsQuery
+    const { data: reviews, error } = await reviewsQuery
 
     if (error) {
       console.error('Reviews query error:', error)
@@ -51,8 +43,32 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
+    // Step 3: Get company names for these reviews
+    const allCompanyIds = [...new Set((reviews || []).map((r: any) => r.company_id).filter(Boolean))]
+    let companyMap: Record<number, string> = {}
+    if (allCompanyIds.length > 0) {
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id, name')
+        .in('id', allCompanyIds)
+      companyMap = Object.fromEntries((companies || []).map((c: any) => [c.id, c.name]))
+    }
+
+    // Step 4: Get total count
+    let countQuery = supabase.from('reviews').select('id', { count: 'exact', head: true })
+    if (companyIds) {
+      countQuery = countQuery.in('company_id', companyIds)
+    }
+    const { count } = await countQuery
+
+    // Combine
+    const enriched = (reviews || []).map((r: any) => ({
+      ...r,
+      company: r.company_id ? { id: r.company_id, name: companyMap[r.company_id] || '未知' } : null
+    }))
+
     return NextResponse.json({
-      reviews: reviews || [],
+      reviews: enriched,
       total: count || 0,
       page,
       pageSize
