@@ -71,9 +71,9 @@ export default async function CompaniesPage({
                 <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
                   <div className="company-header">
                     <h3 className="company-name">{company.name}</h3>
-                    <span className="company-posts">{company.business}</span>
+                    {company.industry && <span className="company-posts">{company.industry}</span>}
                   </div>
-                  {company.address && <p className="company-business">{company.address}</p>}
+                  {company.location && <p className="company-business">{company.location}</p>}
                 </Link>
               ))
             )}
