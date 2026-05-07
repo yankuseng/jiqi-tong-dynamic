@@ -34,20 +34,20 @@ export default async function HomePage() {
       <section className="hero">
         <h1>济企通</h1>
         <p className="subtitle">济南求职避坑指南 | 让求职者少踩坑，让好企业被看见</p>
-        <div className="search-box">
-          <input type="text" placeholder="搜索企业名称..." />
-          <button>搜索</button>
-        </div>
+        <form method="get" action="/companies" className="search-box">
+          <input type="text" name="search" placeholder="搜索企业名称..." />
+          <button type="submit">搜索</button>
+        </form>
       </section>
 
       <section className="stats-bar">
         <div className="stats-grid">
           <div className="stat-item">
-            <div className="number">{companies.length}+</div>
+            <div className="number">1000+</div>
             <div className="label">收录企业</div>
           </div>
           <div className="stat-item">
-            <div className="number">5000+</div>
+            <div className="number">253</div>
             <div className="label">真实点评</div>
           </div>
           <div className="stat-item">
@@ -64,9 +64,9 @@ export default async function HomePage() {
             <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
               <div className="company-header">
                 <h3 className="company-name">{company.name}</h3>
-                <span className="company-posts">{company.business}</span>
+                <span className="company-posts">{company.industry}</span>
               </div>
-              {company.address && <p className="company-business">{company.address}</p>}
+              {company.location && <p className="company-business">{company.location}</p>}
             </Link>
           ))}
         </div>
