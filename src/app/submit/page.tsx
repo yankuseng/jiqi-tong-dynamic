@@ -1,166 +1,78 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
 
-function SubmitForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const preselectedCompany = searchParams.get('company') || ''
+interface Tag {
+  id: string
+  label: string
+}
 
+const TAGS: Tag[] = [
+  { id: '加班少', label: '加班少' },
+  { id: '氛围好', label: '氛围好' },
+  { id: '福利好', label: '福利好' },
+  { id: '成长快', label: '成长快' },
+  { id: '钱多', label: '钱多' },
+  { id: '管理人性化', label: '管理人性化' },
+  { id: '996', label: '996' },
+  { id: '拖欠工资', label: '拖欠工资' },
+  { id: '裁员多', label: '裁员多' },
+  { id: '套路多', label: '套路多' },
+]
+
+export default function SubmitPage() {
   const [formData, setFormData] = useState({
-    company_name: preselectedCompany,
+    company_name: '',
+    identity: '',
     content: '',
-    overtime: '',
-    salary: '',
+    contact: '',
     agreed: false,
   })
+  const [rating, setRating] = useState(0)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null)
+  const [result, setResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.agreed) {
-      setResult({ type: 'error', message: '请先阅读并同意《用户服务协议与社区准则》' })
+      setResult({ type: 'error', message: '请先阅读并同意用户协议' })
       return
     }
     setSubmitting(true)
     setResult(null)
 
     try {
-      const res = await fetch('/api/reviews/submit', {
+      const res = await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, rating, tags: selectedTags }),
       })
 
       const data = await res.json()
 
       if (res.ok) {
-        if (data.status === 'approved') {
-          // 如果有company_id则跳转到企业详情页，否则跳转到企业列表
-          const redirectUrl = data.company_id ? `/companies/${data.company_id}` : '/companies'
-          setResult({ type: 'success', message: '提交成功！正在跳转...' })
-          setFormData({ company_name: '', content: '', overtime: '', salary: '', agreed: false })
-          setTimeout(() => {
-            router.push(redirectUrl)
-          }, 1000)
-        } else if (data.status === 'pending') {
-          setResult({ type: 'warning', message: '提交成功！你的点评正在审核中，审核通过后会显示。' })
-          setFormData({ company_name: '', content: '', overtime: '', salary: '', agreed: false })
-        }
+        setResult({ type: 'success', message: '提交成功，感谢您的反馈！' })
+        setFormData({ company_name: '', identity: '', content: '', contact: '', agreed: false })
+        setRating(0)
+        setSelectedTags([])
       } else {
         setResult({ type: 'error', message: data.error || '提交失败，请重试' })
       }
-    } catch (error) {
+    } catch {
       setResult({ type: 'error', message: '网络错误，请重试' })
     } finally {
       setSubmitting(false)
     }
   }
 
-  return (
-    <section className="form-section">
-      <div className="form-card">
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>分享你的工作经历</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>
-          帮助济南的求职者了解真实的公司情况，你的分享会让更多人少走弯路。
-        </p>
-
-        {result && (
-          <div className={`alert alert-${result.type}`}>
-            {result.message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="company_name">公司名称 *</label>
-            <input
-              type="text"
-              id="company_name"
-              value={formData.company_name}
-              onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-              placeholder="请输入公司全称"
-              required
-              readOnly={!!preselectedCompany}
-              style={preselectedCompany ? { backgroundColor: 'var(--bg-color)', cursor: 'not-allowed' } : {}}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="content">点评内容 *</label>
-            <textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="分享你在该公司的工作体验，例如：
-• 公司氛围怎么样
-• 加班情况如何
-• 薪资待遇
-• 领导管理风格
-• 建议给求职者的建议"
-              required
-            />
-            <p className="form-hint">请客观真实地分享你的经历，审核通过后即可显示</p>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="overtime">加班情况（选填）</label>
-            <input
-              type="text"
-              id="overtime"
-              value={formData.overtime}
-              onChange={(e) => setFormData({ ...formData, overtime: e.target.value })}
-              placeholder="例如：平时加班到7点，周六偶尔加班"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="salary">薪资情况（选填）</label>
-            <input
-              type="text"
-              id="salary"
-              value={formData.salary}
-              onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-              placeholder="例如：12K × 13薪"
-            />
-            <p className="form-hint">薪资信息会帮助求职者更好地评估offer</p>
-          </div>
-
-          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="agree"
-              checked={formData.agreed}
-              onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
-              style={{ marginTop: 4, width: 16, height: 16, cursor: 'pointer' }}
-            />
-            <label htmlFor="agree" style={{ fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.5 }}>
-              我已阅读并同意<a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>《用户服务协议与社区准则》</a>，承诺以上内容真实有效，基于本人真实工作经历，如有虚假由本人承担法律责任。
-            </label>
-          </div>
-
-          <button type="submit" className="submit-btn" disabled={submitting}>
-            {submitting ? '提交中...' : '提交点评'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: 24, padding: 16, background: 'var(--bg-color)', borderRadius: 'var(--radius)', fontSize: 14, color: 'var(--text-secondary)' }}>
-          <strong>温馨提示：</strong>
-          <ul style={{ marginTop: 8, paddingLeft: 20 }}>
-            <li>请勿发布虚假信息、恶意诋毁或涉及个人隐私的内容</li>
-            <li>你的点评将有助于济南的求职者做出更好的选择</li>
-            <li>提交后系统会自动审核，审核通过即可显示</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-export default function SubmitPage() {
   return (
     <div className="container">
       <header className="header">
@@ -177,15 +89,140 @@ export default function SubmitPage() {
         </div>
       </header>
 
-      <Suspense fallback={
-        <section className="form-section">
-          <div className="form-card" style={{ textAlign: 'center', padding: 40 }}>
-            <p>加载中...</p>
-          </div>
-        </section>
-      }>
-        <SubmitForm />
-      </Suspense>
+      <section className="form-section">
+        <div className="form-card">
+          <h1>提交企业评价</h1>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+            帮助济南求职者了解真实的公司情况
+          </p>
+
+          {result && (
+            <div className={`alert alert-${result.type}`}>
+              {result.message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="company_name">公司名称 *</label>
+              <input
+                type="text"
+                id="company_name"
+                value={formData.company_name}
+                onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                placeholder="请输入公司全称"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="identity">您的身份 *</label>
+              <input
+                type="text"
+                id="identity"
+                value={formData.identity}
+                onChange={(e) => setFormData({ ...formData, identity: e.target.value })}
+                placeholder="如：在职员工、离职员工、求职者等"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>综合评分 *</label>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 24,
+                      color: star <= rating ? '#ffc107' : '#e0e0e0',
+                    }}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <p className="form-hint">{rating === 0 ? '请选择评分' : `${rating}星`}</p>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="content">评价内容 *</label>
+              <textarea
+                id="content"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="分享您的真实工作体验..."
+                required
+                rows={5}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>标签（可多选）</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {TAGS.map((tag) => (
+                  <label
+                    key={tag.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '4px 12px',
+                      borderRadius: 'var(--radius)',
+                      border: selectedTags.includes(tag.id) ? '1px solid var(--primary-color)' : '1px solid var(--border-color)',
+                      background: selectedTags.includes(tag.id) ? 'var(--primary-color)' : 'transparent',
+                      color: selectedTags.includes(tag.id) ? '#fff' : 'var(--text-primary)',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={() => handleTagToggle(tag.id)}
+                      style={{ display: 'none' }}
+                    />
+                    {tag.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contact">联系方式（选填）</label>
+              <input
+                type="text"
+                id="contact"
+                value={formData.contact}
+                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                placeholder="邮箱或手机号（仅用于联系核实）"
+              />
+            </div>
+
+            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <input
+                type="checkbox"
+                id="agree"
+                checked={formData.agreed}
+                onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
+                style={{ marginTop: 4, width: 16, height: 16, cursor: 'pointer' }}
+              />
+              <label htmlFor="agree" style={{ fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.5 }}>
+                我已阅读并同意<a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>《用户服务协议》</a>，承诺以上内容真实有效。
+              </label>
+            </div>
+
+            <button type="submit" className="submit-btn" disabled={submitting}>
+              {submitting ? '提交中...' : '提交评价'}
+            </button>
+          </form>
+        </div>
+      </section>
 
       <footer className="footer">
         <div className="container">
