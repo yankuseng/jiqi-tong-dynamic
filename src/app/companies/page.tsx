@@ -11,7 +11,8 @@ async function getCompanies(search?: string, region?: string, sort?: string, pag
   let query = supabase
     .from('companies')
     .select('*', { count: 'exact' })
-    .or('industry.not.is.null,industry.neq.""')
+    .not('industry', 'is', null)
+    .neq('industry', '')
 
   if (search) {
     query = query.ilike('name', `%${search}%`)
