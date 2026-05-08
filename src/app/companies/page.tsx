@@ -146,7 +146,7 @@ export default async function CompaniesPage({
               </p>
             ) : (
               companies.map((company: any) => (
-                <Link key={company.id} href={`/companies/${company.id}`} className="company-card">
+                <Link key={company.id} href={`/companies/${encodeURIComponent(company.name)}`} className="company-card">
                   <div className="company-header">
                     <h3 className="company-name">{company.name}</h3>
                     {company.industry && <span className="company-posts">{company.industry}</span>}
