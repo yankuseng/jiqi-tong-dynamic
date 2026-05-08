@@ -6,7 +6,8 @@ async function getCompanies() {
   const { data: companies } = await supabase
     .from('companies')
     .select('*')
-    .or('industry.not.is.null,industry.neq.""')
+    .not('industry', 'is', null)
+    .neq('industry', '')
     .order('posts_count', { ascending: false })
     .limit(20)
 
