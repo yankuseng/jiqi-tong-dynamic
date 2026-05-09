@@ -231,9 +231,11 @@ export async function POST(request: NextRequest) {
       }
       
       // Update posts_count on companies table
-      await supabase.rpc('increment_posts_count', { company_id: companyId }).catch(() => {
+      try {
+        await supabase.rpc('increment_posts_count', { company_id: companyId })
+      } catch (e) {
         // Ignore if RPC not available
-      })
+      }
       
       return NextResponse.json({
         status: 'approved',
