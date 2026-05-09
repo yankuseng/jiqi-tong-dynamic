@@ -158,6 +158,38 @@ async function notifyFeishuReview(companyName: string, content: string, queueId:
   }
 }
 
+// Get or create company - returns company id
+async function getOrCreateCompany(supabase: any, companyName: string): Promise<number> {
+  // Try to find existing company
+  const { data: existing } = await supabase
+    .from('companies')
+    .select('id, name')
+    .eq('name', companyName)
+    .single()
+  
+  if (existing) {
+    return existing.id
+  }
+  
+  // Auto-create new company
+  const { data: newCompany, error: createError } = await supabase
+    .from('companies')
+    .insert({
+      name: companyName,
+      summary: '暂无简介',
+      location: null,
+      industry: null,
+    })
+    .select('id')
+    .single()
+  
+  if (createError || !newCompany) {
+    throw new Error(`Failed to create company: ${createError?.message}`)
+  }
+  
+  return newCompany.id
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -177,21 +209,8 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     
     if (moderation.passed) {
-      // Company must exist in database - find it
-      const { data: existingCompany } = await supabase
-        .from('companies')
-        .select('id, name')
-        .eq('name', company_name)
-        .single()
-      
-      if (!existingCompany) {
-        return NextResponse.json(
-          { error: '未找到该公司，请先在企业列表中搜索确认公司存在' },
-          { status: 400 }
-        )
-      }
-      
-      const companyId: number = existingCompany.id
+      // Get or create company (auto-create if not exists)
+      const companyId = await getOrCreateCompany(supabase, company_name)
       
       // Insert review
       const { error: insertError } = await supabase
@@ -210,6 +229,11 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
+      
+      // Update posts_count on companies table
+      await supabase.rpc('increment_posts_count', { company_id: companyId }).catch(() => {
+        // Ignore if RPC not available
+      })
       
       return NextResponse.json({
         status: 'approved',
