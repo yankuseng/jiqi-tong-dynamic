@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 
 interface Tag {
   id: string
@@ -23,11 +22,8 @@ const TAGS: Tag[] = [
 ]
 
 export default function SubmitPage() {
-  const searchParams = useSearchParams()
-  const prefillCompany = searchParams.get('company') || ''
-
   const [formData, setFormData] = useState({
-    company_name: prefillCompany,
+    company_name: '',
     identity: '',
     content: '',
     contact: '',
@@ -37,6 +33,15 @@ export default function SubmitPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  // 从 URL 参数读取预填企业名称
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const company = params.get('company')
+    if (company) {
+      setFormData(prev => ({ ...prev, company_name: decodeURIComponent(company) }))
+    }
+  }, [])
 
   const handleTagToggle = (tagId: string) => {
     setSelectedTags((prev) =>
