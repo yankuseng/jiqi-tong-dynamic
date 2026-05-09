@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 interface Tag {
   id: string
@@ -22,8 +23,11 @@ const TAGS: Tag[] = [
 ]
 
 export default function SubmitPage() {
+  const searchParams = useSearchParams()
+  const prefillCompany = searchParams.get('company') || ''
+
   const [formData, setFormData] = useState({
-    company_name: '',
+    company_name: prefillCompany,
     identity: '',
     content: '',
     contact: '',
@@ -50,10 +54,16 @@ export default function SubmitPage() {
     setResult(null)
 
     try {
-      const res = await fetch('/api/report', {
+      const overtime = selectedTags.length > 0 ? selectedTags.join('、') : ''
+      const res = await fetch('/api/reviews/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, rating, tags: selectedTags }),
+        body: JSON.stringify({
+          company_name: formData.company_name,
+          content: formData.content,
+          overtime: overtime || null,
+          salary: null,
+        }),
       })
 
       const data = await res.json()
