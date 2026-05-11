@@ -79,18 +79,6 @@ export default async function TermsPage() {
       </main>
 
       {/* Site Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-bottom">
-            <p>© 2024-2026 济企通 JiqiTong.com | 济南求职避坑指南</p>
-            <div className="footer-links">
-              <Link href="/terms">用户协议</Link>
-              <span className="footer-sep">|</span>
-              <Link href="/report">企业申诉</Link>
-            </div>
           </div>
-        </div>
-      </footer>
-    </div>
   )
 }
