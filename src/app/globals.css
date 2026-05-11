@@ -1515,3 +1515,115 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ===== COMPANY CARD STYLES FOR /companies PAGE ===== */
+.company-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.company-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.company-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.company-card-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.company-card-header h3 a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.company-card-header h3 a:hover {
+  color: var(--primary);
+}
+
+.company-card-summary {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.company-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.company-card-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 10px;
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.company-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-primary.btn-sm {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-primary.btn-sm:hover {
+  background: var(--primary-light);
+}
+
+.btn-outline.btn-sm {
+  background: transparent;
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-outline.btn-sm:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.review-count {
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
