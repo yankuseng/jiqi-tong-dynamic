@@ -1658,3 +1658,5 @@ body {
 .footer-sep {
   color: var(--border-dark);
 }
+.link { color: var(--primary-color); text-decoration: none; }
+.link:hover { text-decoration: underline; }
