@@ -131,36 +131,6 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '1.125rem', marginBottom: 8 }}>
-                济企通<span style={{ color: 'var(--accent)' }}>.</span>
-              </div>
-              <p style={{ color: 'var(--text-secondary)', maxWidth: 300 }}>
-                济南本地企业点评平台，致力于为求职者提供真实、客观的企业评价信息。
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 48 }}>
-              <div>
-                <h4 style={{ fontWeight: 600, marginBottom: 12 }}>关于济企通</h4>
-                <Link href="/" style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>首页</Link>
-                <Link href="/companies" style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>企业列表</Link>
-                <Link href="/submit" style={{ color: 'var(--text-secondary)', display: 'block' }}>投稿入口</Link>
-              </div>
-              <div>
-                <h4 style={{ fontWeight: 600, marginBottom: 12 }}>帮助与支持</h4>
-                <Link href="/terms" style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>用户协议</Link>
-                <Link href="/report" style={{ color: 'var(--text-secondary)', display: 'block' }}>企业申诉</Link>
-              </div>
-            </div>
           </div>
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            © 2024 济企通 JiqiTong.com | 济南求职避坑指南
-          </div>
-        </div>
-      </footer>
-    </div>
   )
 }
