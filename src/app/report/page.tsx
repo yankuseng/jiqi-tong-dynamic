@@ -210,13 +210,6 @@ export default function ReportPage() {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-bottom">
-            <p>© 2024 济企通 JiqiTong.com | 济南求职避坑指南</p>
           </div>
-        </div>
-      </footer>
-    </div>
   )
 }
