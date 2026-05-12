@@ -48,7 +48,25 @@ npm run dev
 
 ## 功能说明
 
-### 用户投稿流程
+### 用户端
+
+| 页面 | 路径 | 说明 |
+|------|------|------|
+| 首页 | `/` | 济南企业列表，支持搜索和行业筛选 |
+| 企业详情 | `/companies/[id]` | 企业评分、点评、基础信息 |
+| 投稿 | `/submit` | 用户提交对企业的点评 |
+
+### 管理后台
+
+| 页面 | 路径 | 说明 |
+|------|------|------|
+| 数据概览 | `/admin` | 企业数、点评数、待审核数量统计 |
+| 企业管理 | `/admin/companies` | 企业列表、搜索、认证状态管理 |
+| 申诉处理 | `/admin/appeals` | 企业申诉审核，通过/驳回操作 |
+| 点评管理 | `/admin/reviews` | 所有点评列表，单删/批量删除 |
+| 审核队列 | `/admin/review` | AI预审高风险内容人工复核 |
+
+### 投稿审核流程
 
 ```
 用户提交点评
@@ -56,55 +74,91 @@ npm run dev
 AI预审（检测XSS/手机号/微信号/脏话）
     ↓
 ├── 风险 < 70% → 直接发布
-└── 风险 >= 70% → 飞书通知 → 人工审核
+└── 风险 >= 70% → 飞书通知 → 人工审核 → 通过/驳回
 ```
 
-### 审核管理
+申诉流程：
 
-访问 `/admin/review` 管理待审核队列。
-
-飞书通知卡片包含"通过"和"拒绝"按钮，可直接操作。
+```
+用户发布点评
+    ↓
+企业发起申诉 → 进入 appeals 表
+    ↓
+管理员审核 → 通过(点评上链) / 驳回(维持原状)
+```
 
 ## 目录结构
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                    # 首页
+│   ├── page.tsx                      # 首页
 │   ├── companies/
-│   │   ├── page.tsx               # 企业列表
-│   │   └── [id]/page.tsx          # 企业详情
-│   ├── submit/page.tsx             # 投稿表单
-│   ├── admin/review/page.tsx       # 审核队列
+│   │   ├── page.tsx                  # 企业列表
+│   │   └── [id]/page.tsx             # 企业详情
+│   ├── submit/page.tsx               # 投稿表单
+│   ├── admin/
+│   │   ├── page.tsx                  # 数据概览仪表盘
+│   │   ├── companies/page.tsx        # 企业管理
+│   │   ├── appeals/page.tsx          # 申诉处理
+│   │   ├── reviews/page.tsx          # 点评管理
+│   │   └── review/page.tsx           # 审核队列
 │   └── api/
 │       ├── reviews/
-│       │   ├── submit/route.ts     # 提交点评API
-│       │   └── approve/route.ts    # 审核操作API
-│       └── admin/queue/route.ts    # 队列查询API
+│       │   ├── submit/route.ts       # 提交点评 + AI预审
+│       │   └── approve/route.ts      # 审核操作（通过/拒绝）
+│       ├── admin/
+│       │   ├── stats/route.ts        # 仪表盘统计
+│       │   ├── companies/route.ts    # 企业管理 CRUD
+│       │   ├── appeals/route.ts     # 申诉列表 + 处理
+│       │   ├── reviews/route.ts      # 点评列表查询 + 删除
+│       │   └── queue/route.ts        # 审核队列查询
+│       ├── companies/route.ts        # 企业列表公开 API
+│       └── seed/route.ts             # 测试数据填充
 ├── lib/
-│   └── supabase.ts                 # Supabase客户端
-└── app/globals.css                 # 全局样式
+│   └── supabase.ts                   # Supabase 客户端
+└── app/globals.css                   # 全局样式
 ```
 
 ## 数据库表
 
 | 表名 | 说明 |
 |------|------|
-| companies | 企业信息 |
-| reviews | 已发布的点评 |
-| review_queue | 待审核队列 |
+| `companies` | 企业信息（名称、行业、员工规模、评分、认证状态）|
+| `reviews` | 已发布的点评（关联企业，含内容、加班、薪资情况）|
+| `review_queue` | AI预审高风险待复核队列 |
+| `appeals` | 企业申诉记录（关联 review，状态：pending/approved/rejected）|
 
-详见 `supabase/migrations/001_initial_schema.sql`
+**appeals 建表 SQL：**
 
-## 下一步
+```sql
+CREATE TABLE appeals (
+  id SERIAL PRIMARY KEY,
+  review_id INTEGER REFERENCES reviews(id),
+  reason TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',  -- pending / approved / rejected
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
 
-- [ ] 添加历史数据迁移脚本
-- [ ] 添加搜索功能
-- [ ] 添加用户系统（可选）
+完整表结构见 `supabase/migrations/001_initial_schema.sql`
 
-<!-- env update: 2026-05-06 13:46:30 -->
+## 环境变量清单
 
-<!-- redeploy trigger: 2026-05-06 13:50:34 -->
+| 变量名 | 必填 | 说明 |
+|--------|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase 项目地址 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | 公开 API Key（浏览器端用）|
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | 服务端 Key（API 路由用）|
+| `FEISHU_WEBHOOK_URL` | ✅ | 飞书机器人 Webhook |
+| `NEXT_PUBLIC_SITE_URL` | ❌ | 站点地址（默认 Vercel 域名）|
 
+## 部署说明
 
-<!-- force-redeploy: 1778469927.067791 -->
+Vercel 部署后会自动拉取 GitHub 仓库，每次 push 到 `main` 分支即触发自动部署。
+
+若 `.env.local` 变更，需在 Vercel Dashboard → Settings → Environment Variables 中更新，**重新部署**后生效。
+
+---
+
+<!-- env update: 2026-05-12 08:42:50 -->
