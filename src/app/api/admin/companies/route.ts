@@ -18,25 +18,16 @@ export async function GET(request: NextRequest) {
       .select('id, name, business, posts_count, rating, summary, created_at', { count: 'exact' })
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,business.ilike.%${search}%`)
+      query = query.ilike('name', `%${search}%`)
     }
 
     const { data: companies, error, count } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize - 1)
 
-    if (error) throw error
-
-    const companyIds = (companies || []).map((c: any) => c.id)
-    let reviewCounts: Record<number, number> = {}
-    if (companyIds.length > 0) {
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('company_id', { count: 'exact' })
-        .in('company_id', companyIds)
-      for (const r of (reviews || [])) {
-        reviewCounts[r.company_id] = (reviewCounts[r.company_id] || 0) + 1
-      }
+    if (error) {
+      console.error('Companies query error:', error)
+      throw error
     }
 
     const enriched = (companies || []).map((c: any) => ({
