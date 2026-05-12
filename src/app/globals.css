@@ -610,14 +610,38 @@ body {
   left: 0;
   right: 0;
   background: var(--surface);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   z-index: 200;
+  padding: 16px 24px;
 }
 
 .fixed-bottom-inner {
   display: flex;
   justify-content: center;
-  padding: 16px 24px;
+  padding: 0;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 14px 32px;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.cta-button:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
 }
 
 /* ========== Form Page ========== */
