@@ -5,10 +5,16 @@
   --accent: #F97316;
   --accent-hover: #EA580C;
   --bg: #F8FAFC;
+  --bg-color: var(--bg);
   --surface: #FFFFFF;
+  --card-bg: var(--surface);
   --fg: #1E293B;
   --fg-muted: #64748B;
+  --text-primary: var(--fg);
+  --text-secondary: var(--fg-muted);
+  --text-muted: #94A3B8;
   --border: #E2E8F0;
+  --border-color: var(--border);
   --border-dark: #CBD5E1;
   --success: #17A34A;
   --warning: #EAB308;
@@ -19,6 +25,8 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius: var(--radius-md);
+  --shadow: var(--shadow-md);
   --header-height: 64px;
   --font-display: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
