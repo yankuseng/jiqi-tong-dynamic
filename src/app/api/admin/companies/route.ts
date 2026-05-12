@@ -1,55 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
-// GET: 获取企业管理列表
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '20')
     const search = searchParams.get('search') || ''
-    const status = searchParams.get('status') || ''
     const offset = (page - 1) * pageSize
 
     const supabase = createServerClient()
 
-    let query = supabase
-      .from('companies')
-      .select('id, name, business, posts_count, rating, summary, created_at', { count: 'exact' })
+    let query = supabase.from('companies').select('*')
 
     if (search) {
       query = query.ilike('name', `%${search}%`)
     }
 
     const { data: companies, error, count } = await query
-      .order('created_at', { ascending: false })
+      .order('posts_count', { ascending: false })
       .range(offset, offset + pageSize - 1)
 
     if (error) {
       console.error('Companies query error:', error)
-      throw error
+      return NextResponse.json({ error: '获取企业列表失败', detail: error.message }, { status: 500 })
     }
 
-    const enriched = (companies || []).map((c: any) => ({
-      id: c.id,
-      name: c.name,
-      industry: c.business || '-',
-      employees: '-',
-      rating: c.rating || 0,
-      pv: 0,
-      status: (c.posts_count || 0) > 0 ? 'verified' : 'pending',
-      reviews: c.posts_count || 0,
-      created_at: c.created_at,
-    }))
-
-    return NextResponse.json({ companies: enriched, total: count || 0, page, pageSize })
+    return NextResponse.json({
+      companies: companies || [],
+      total: count || (companies || []).length,
+      page,
+      pageSize,
+    })
   } catch (err) {
     console.error('Companies GET error:', err)
     return NextResponse.json({ error: '获取企业列表失败' }, { status: 500 })
   }
 }
 
-// PATCH: 更新企业信息
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
@@ -58,7 +46,7 @@ export async function PATCH(request: NextRequest) {
 
     const supabase = createServerClient()
     const { error } = await supabase.from('companies').update(updates).eq('id', id)
-    if (error) throw error
+    if (error) return NextResponse.json({ error: '更新企业失败', detail: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Companies PATCH error:', err)
@@ -66,7 +54,6 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE: 删除企业
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -75,7 +62,7 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createServerClient()
     const { error } = await supabase.from('companies').delete().eq('id', parseInt(id))
-    if (error) throw error
+    if (error) return NextResponse.json({ error: '删除企业失败', detail: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Companies DELETE error:', err)
