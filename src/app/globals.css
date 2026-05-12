@@ -66,6 +66,11 @@ body {
   justify-content: space-between;
   align-items: center;
   height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-inner {
@@ -1355,12 +1360,6 @@ body {
 
 .form-section {
   padding: 40px 0;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .info {
