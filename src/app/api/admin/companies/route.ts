@@ -15,13 +15,10 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('companies')
-      .select('id, name, industry, employees, rating, pv, status, created_at', { count: 'exact' })
+      .select('id, name, business, posts_count, rating, summary, created_at', { count: 'exact' })
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,industry.ilike.%${search}%`)
-    }
-    if (status && status !== 'all') {
-      query = query.eq('status', status === 'verified' ? 'verified' : 'pending')
+      query = query.or(`name.ilike.%${search}%,business.ilike.%${search}%`)
     }
 
     const { data: companies, error, count } = await query
@@ -43,8 +40,15 @@ export async function GET(request: NextRequest) {
     }
 
     const enriched = (companies || []).map((c: any) => ({
-      ...c,
-      reviews: reviewCounts[c.id] || 0,
+      id: c.id,
+      name: c.name,
+      industry: c.business || '-',
+      employees: '-',
+      rating: c.rating || 0,
+      pv: c.posts_count || 0,
+      status: c.posts_count > 0 ? 'verified' : 'pending',
+      reviews: c.posts_count || 0,
+      created_at: c.created_at,
     }))
 
     return NextResponse.json({ companies: enriched, total: count || 0, page, pageSize })
