@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
       industry: c.business || '-',
       employees: '-',
       rating: c.rating || 0,
-      pv: c.posts_count || 0,
-      status: c.posts_count > 0 ? 'verified' : 'pending',
+      pv: 0,
+      status: (c.posts_count || 0) > 0 ? 'verified' : 'pending',
       reviews: c.posts_count || 0,
       created_at: c.created_at,
     }))
