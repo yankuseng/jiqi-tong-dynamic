@@ -146,13 +146,6 @@ export default async function CompanyPage({ params }: PageProps) {
         </div>
       </div>
 
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-bottom">
-            <p>© 2024 济企通 JiqiTong.com | 济南求职避坑指南 <span style={{ margin: '0 8px' }}>|</span> <Link href="/terms" style={{ color: 'var(--text-secondary)' }}>用户协议</Link> <span style={{ margin: '0 8px' }}>|</span> <Link href="/report" style={{ color: 'var(--text-secondary)' }}>企业申诉</Link></p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
