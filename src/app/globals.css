@@ -1704,7 +1704,7 @@ body {
 .link:hover { text-decoration: underline; }
 
 /* ===== Site Footer ===== */
-.footer { background: var(--surface); padding: 48px 0 24px; border-top: 1px solid var(--border); }
+.footer { background: var(--surface); padding: 16px 0 24px; border-top: 1px solid var(--border); }
 .footer-top {
   display: flex;
   justify-content: space-between;
