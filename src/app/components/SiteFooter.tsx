@@ -26,7 +26,7 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="footer-bottom">
-          © 2024-2026 济企通 JiqiTong.com | 济南求职避坑指南
+          <p>© 2024 济企通 <a href="http://jiqitong.com/" target="_blank" rel="noopener noreferrer">JiqiTong.com</a> | 济南求职避坑指南 | <Link href="/terms">用户协议</Link> | <Link href="/report">企业申诉</Link></p>
         </div>
       </div>
     </footer>
